@@ -1,0 +1,9 @@
+{
+	"name": "HEDDFUK",
+	"location": "westeurope",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "116b6b1e-c6fd-48cb-a28f-a7119c76e06b",
+		"tenantId": "26838705-b8cf-4fb4-a9d3-1a14c2717e5c"
+	}
+}
