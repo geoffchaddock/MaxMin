@@ -1,0 +1,12 @@
+{
+	"name": "MaxMinSalesDS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "MaxMinSaleLS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": []
+	}
+}
