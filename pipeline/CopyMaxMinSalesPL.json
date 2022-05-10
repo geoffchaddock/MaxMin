@@ -201,6 +201,9 @@
 								}
 							},
 							{
+								"source": {
+									"name": "PipelineGuid"
+								},
 								"sink": {
 									"name": "PipelineID",
 									"type": "Guid",
