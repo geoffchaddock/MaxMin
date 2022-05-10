@@ -1,0 +1,86 @@
+{
+	"name": "MaxMinSale_ArchiveDS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "MaxMinSale_ArchiveLS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "PK_Sales_Information_ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "FK_Time",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "FK_Customer",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "FK_Product",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "FK_Promotion",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "FK_Sales_Person",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "FK_Store",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Sales_in_Dollars",
+				"type": "money",
+				"precision": 19,
+				"scale": 4
+			},
+			{
+				"name": "Sales_in_Units",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Sales_Tax",
+				"type": "money",
+				"precision": 19,
+				"scale": 4
+			},
+			{
+				"name": "Shipping",
+				"type": "money",
+				"precision": 19,
+				"scale": 4
+			},
+			{
+				"name": "DateArchived",
+				"type": "smalldatetime",
+				"precision": 16,
+				"scale": 0
+			},
+			{
+				"name": "PipelineID",
+				"type": "uniqueidentifier"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "Sales_Information"
+		}
+	}
+}
