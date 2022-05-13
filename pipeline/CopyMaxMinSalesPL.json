@@ -5,7 +5,14 @@
 			{
 				"name": "Copy Sales Data",
 				"type": "Copy",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Create New Partition",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -230,6 +237,65 @@
 						"type": "DatasetReference"
 					}
 				]
+			},
+			{
+				"name": "Create New Partition",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[usp_MergePartition]",
+					"storedProcedureParameters": {
+						"RemovePartitionBoundry": {
+							"value": null,
+							"type": "DateTime"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "MaxMinSaleLS",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Merge Old Partition",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Copy Sales Data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[usp_SplitPartition]",
+					"storedProcedureParameters": {
+						"NewPartitionBoundry": {
+							"value": null,
+							"type": "DateTime"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "MaxMinSaleLS",
+					"type": "LinkedServiceReference"
+				}
 			}
 		],
 		"folder": {
