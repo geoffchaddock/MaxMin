@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Copy Sales Data",
+				"name": "Archive Partition Data",
 				"type": "Copy",
 				"dependsOn": [
 					{
@@ -269,7 +269,7 @@
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
-						"activity": "Copy Sales Data",
+						"activity": "Archive Partition Data",
 						"dependencyConditions": [
 							"Succeeded"
 						]
