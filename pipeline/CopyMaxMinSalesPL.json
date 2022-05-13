@@ -253,7 +253,7 @@
 				"typeProperties": {
 					"storedProcedureName": "[dbo].[usp_SplitPartition]",
 					"storedProcedureParameters": {
-						"RemovePartitionBoundry": {
+						"NewPartitionBoundry": {
 							"value": null,
 							"type": "DateTime"
 						}
@@ -286,7 +286,7 @@
 				"typeProperties": {
 					"storedProcedureName": "[dbo].[usp_MergePartition]",
 					"storedProcedureParameters": {
-						"NewPartitionBoundry": {
+						"RemovePartitionBoundry": {
 							"value": null,
 							"type": "DateTime"
 						}
