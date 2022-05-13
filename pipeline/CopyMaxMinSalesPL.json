@@ -254,7 +254,7 @@
 					"storedProcedureName": "[dbo].[usp_SplitPartition]",
 					"storedProcedureParameters": {
 						"NewPartitionBoundry": {
-							"value": null,
+							"value": "",
 							"type": "DateTime"
 						}
 					}
@@ -287,7 +287,7 @@
 					"storedProcedureName": "[dbo].[usp_MergePartition]",
 					"storedProcedureParameters": {
 						"RemovePartitionBoundry": {
-							"value": null,
+							"value": "",
 							"type": "DateTime"
 						}
 					}
@@ -298,6 +298,16 @@
 				}
 			}
 		],
+		"parameters": {
+			"NewPartitionBoundry": {
+				"type": "string",
+				"defaultValue": "31Dec2011"
+			},
+			"RemovePartitionBoundry": {
+				"type": "string",
+				"defaultValue": "31Dec2007"
+			}
+		},
 		"folder": {
 			"name": "MaxMinSalesEOYProcess"
 		},
