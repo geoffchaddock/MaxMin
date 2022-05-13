@@ -251,7 +251,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"storedProcedureName": "[dbo].[usp_MergePartition]",
+					"storedProcedureName": "[dbo].[usp_SplitPartition]",
 					"storedProcedureParameters": {
 						"RemovePartitionBoundry": {
 							"value": null,
