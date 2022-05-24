@@ -5,11 +5,17 @@
 			"referenceName": "MaxMinBatchFileLS",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"BatchFile": {
+				"type": "string"
+			}
+		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
+				"fileName": "Apr.csv",
 				"folderPath": "BatchFiles",
 				"container": "landing"
 			},
