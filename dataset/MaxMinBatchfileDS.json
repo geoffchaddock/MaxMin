@@ -1,0 +1,52 @@
+{
+	"name": "MaxMinBatchfileDS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "MaxMinBatchFileLS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": "BatchFiles",
+				"container": "landing"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "BatchNumber",
+				"type": "String"
+			},
+			{
+				"name": "MachineNumber",
+				"type": "String"
+			},
+			{
+				"name": "ProductCode",
+				"type": "String"
+			},
+			{
+				"name": "TimeStarted",
+				"type": "String"
+			},
+			{
+				"name": "TimeStopped",
+				"type": "String"
+			},
+			{
+				"name": "NumberProduced",
+				"type": "String"
+			},
+			{
+				"name": "NumberRejected",
+				"type": "String"
+			}
+		]
+	}
+}

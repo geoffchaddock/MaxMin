@@ -1,0 +1,9 @@
+{
+	"name": "ImportManufacturingDataPL",
+	"properties": {
+		"folder": {
+			"name": "MaxMinSalesEOYProcess"
+		},
+		"annotations": []
+	}
+}
