@@ -1,13 +1,35 @@
 {
-	"name": "dataflow1",
+	"name": "DimBatchDF",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
-			"sources": [],
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "MaxMinBatchfileDS",
+						"type": "DatasetReference"
+					},
+					"name": "BatchFile"
+				}
+			],
 			"sinks": [],
 			"transformations": [],
 			"scriptLines": [
-				""
+				"parameters{",
+				"     BatchFileName as string ($BatchFileName)",
+				"}",
+				"source(output(",
+				"          BatchNumber as string,",
+				"          MachineNumber as string,",
+				"          ProductCode as string,",
+				"          TimeStarted as string,",
+				"          TimeStopped as string,",
+				"          NumberProduced as string,",
+				"          NumberRejected as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> BatchFile"
 			]
 		}
 	}
