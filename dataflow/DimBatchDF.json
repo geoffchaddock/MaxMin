@@ -42,7 +42,8 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> BatchFile",
-				"BatchFile derive(BatchName = toString(BatchNumber)) ~> ConvertToBatchName",
+				"BatchFile derive(BatchName = toString(BatchNumber),",
+				"          BatchNumber = toInteger(BatchNumber)) ~> ConvertToBatchName",
 				"ConvertToBatchName sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -56,7 +57,11 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> DimBatch"
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          BatchNumber,",
+				"          BatchName",
+				"     )) ~> DimBatch"
 			]
 		}
 	}
