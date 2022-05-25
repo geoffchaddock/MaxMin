@@ -13,7 +13,11 @@
 				}
 			],
 			"sinks": [],
-			"transformations": [],
+			"transformations": [
+				{
+					"name": "ConvertToBatchName"
+				}
+			],
 			"scriptLines": [
 				"parameters{",
 				"     BatchFileName as string ($BatchFileName)",
@@ -29,7 +33,9 @@
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false) ~> BatchFile"
+				"     ignoreNoFilesFound: false) ~> BatchFile",
+				"BatchFile derive(BatchName = toString(BatchNumber)\r",
+				") ~> ConvertToBatchName"
 			]
 		}
 	}
