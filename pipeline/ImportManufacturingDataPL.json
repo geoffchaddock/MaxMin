@@ -98,15 +98,9 @@
 				"typeProperties": {
 					"scripts": [
 						{
-							"parameters": [
-								{
-									"name": "",
-									"value": ""
-								}
-							],
 							"type": "NonQuery",
 							"text": {
-								"value": "@concat('insert into dba.BatchFileLoadHistory select \"', pipeline().parameters.BatchFile, '\", getdate() ', ', \"', pipeline().RunId, '\"')",
+								"value": "@concat('insert into dba.BatchFileLoadHistory select ''', pipeline().parameters.BatchFile, ''', getdate() , ''', pipeline().RunId, '''')\n\n\n",
 								"type": "Expression"
 							}
 						}
