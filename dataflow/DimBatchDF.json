@@ -12,7 +12,15 @@
 					"name": "BatchFile"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "MaxMinDimBatch",
+						"type": "DatasetReference"
+					},
+					"name": "DimBatch"
+				}
+			],
 			"transformations": [
 				{
 					"name": "ConvertToBatchName"
@@ -34,8 +42,21 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> BatchFile",
-				"BatchFile derive(BatchName = toString(BatchNumber)\r",
-				") ~> ConvertToBatchName"
+				"BatchFile derive(BatchName = toString(BatchNumber)) ~> ConvertToBatchName",
+				"ConvertToBatchName sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          BatchNumber as integer,",
+				"          BatchName as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> DimBatch"
 			]
 		}
 	}

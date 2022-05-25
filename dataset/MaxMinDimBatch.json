@@ -1,0 +1,26 @@
+{
+	"name": "MaxMinDimBatch",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "MaxMinSaleLS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "BatchNumber",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "BatchName",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "Manufacturing",
+			"table": "DimBatch"
+		}
+	}
+}
