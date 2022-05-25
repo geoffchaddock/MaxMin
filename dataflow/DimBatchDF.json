@@ -27,6 +27,9 @@
 				}
 			],
 			"scriptLines": [
+				"parameters{",
+				"     BatchFile as string",
+				"}",
 				"source(output(",
 				"          BatchNumber as string,",
 				"          MachineNumber as string,",
