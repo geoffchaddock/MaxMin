@@ -72,7 +72,8 @@
 		],
 		"parameters": {
 			"BatchFileName": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "jan.csv"
 			}
 		},
 		"folder": {
