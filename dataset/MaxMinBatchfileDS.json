@@ -6,7 +6,7 @@
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"BatchFile": {
+			"BatchFileImport": {
 				"type": "string",
 				"defaultValue": "jan.csv"
 			}
@@ -17,7 +17,7 @@
 			"location": {
 				"type": "AzureBlobStorageLocation",
 				"fileName": {
-					"value": "@dataset().BatchFile",
+					"value": "@dataset().BatchFileImport",
 					"type": "Expression"
 				},
 				"folderPath": "BatchFiles",
