@@ -7,8 +7,7 @@
 		},
 		"parameters": {
 			"BatchFile": {
-				"type": "string",
-				"defaultValue": "jan.csv"
+				"type": "string"
 			}
 		},
 		"annotations": [],
