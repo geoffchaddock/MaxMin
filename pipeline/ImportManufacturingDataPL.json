@@ -24,13 +24,7 @@
 				"typeProperties": {
 					"dataflow": {
 						"referenceName": "DimBatchDF",
-						"type": "DataFlowReference",
-						"parameters": {
-							"BatchFileName": {
-								"value": "'@{pipeline().parameters.BatchFile}'",
-								"type": "Expression"
-							}
-						}
+						"type": "DataFlowReference"
 					},
 					"compute": {
 						"coreCount": 8,
