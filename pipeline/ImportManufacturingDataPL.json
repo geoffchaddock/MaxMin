@@ -30,14 +30,6 @@
 								"value": "'@{pipeline().parameters.BatchFile}'",
 								"type": "Expression"
 							}
-						},
-						"datasetParameters": {
-							"BatchFile": {
-								"BatchFile": {
-									"value": "@pipeline().parameters.BatchFile",
-									"type": "Expression"
-								}
-							}
 						}
 					},
 					"compute": {

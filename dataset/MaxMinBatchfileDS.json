@@ -5,11 +5,6 @@
 			"referenceName": "MaxMinBatchFileLS",
 			"type": "LinkedServiceReference"
 		},
-		"parameters": {
-			"BatchFile": {
-				"type": "string"
-			}
-		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
