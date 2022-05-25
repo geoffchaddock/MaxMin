@@ -39,7 +39,7 @@
 				"          NumberProduced as string,",
 				"          NumberRejected as string",
 				"     ),",
-				"     allowSchemaDrift: true,",
+				"     allowSchemaDrift: false,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> BatchFile",
 				"BatchFile derive(BatchName = toString(BatchNumber),",
