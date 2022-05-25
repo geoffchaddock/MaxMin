@@ -28,7 +28,7 @@
 			],
 			"scriptLines": [
 				"parameters{",
-				"     BatchFileName as string ($BatchFileName)",
+				"     BatchFileName as string",
 				"}",
 				"source(output(",
 				"          BatchNumber as string,",
