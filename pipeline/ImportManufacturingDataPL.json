@@ -30,6 +30,11 @@
 								"value": "'@{pipeline().parameters.BatchFile}'",
 								"type": "Expression"
 							}
+						},
+						"datasetParameters": {
+							"BatchFile": {
+								"BatchFileImport": "Mar.csv"
+							}
 						}
 					},
 					"compute": {
