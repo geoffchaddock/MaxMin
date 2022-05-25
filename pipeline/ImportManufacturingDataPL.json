@@ -26,12 +26,15 @@
 						"referenceName": "DimBatchDF",
 						"type": "DataFlowReference",
 						"parameters": {
-							"BatchFileName": "$BatchFileName"
+							"BatchFileName": {
+								"value": "'@{pipeline().parameters.BatchFile}'",
+								"type": "Expression"
+							}
 						},
 						"datasetParameters": {
 							"BatchFile": {
 								"BatchFile": {
-									"value": "@pipeline().parameters.BatchFileName",
+									"value": "@pipeline().parameters.BatchFile",
 									"type": "Expression"
 								}
 							}
@@ -71,7 +74,7 @@
 			}
 		],
 		"parameters": {
-			"BatchFileName": {
+			"BatchFile": {
 				"type": "string",
 				"defaultValue": "jan.csv"
 			}
