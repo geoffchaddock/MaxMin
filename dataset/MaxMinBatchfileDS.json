@@ -16,7 +16,10 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": "jan.csv",
+				"fileName": {
+					"value": "@dataset().BatchFile",
+					"type": "Expression"
+				},
 				"folderPath": "BatchFiles",
 				"container": "landing"
 			},
