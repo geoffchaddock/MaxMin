@@ -3,11 +3,11 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "DimBatchDF",
+				"name": "DimBatchDFs",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
-						"activity": "Record Load Metadata",
+						"activity": "Record Load Metadatas",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -48,7 +48,7 @@
 				}
 			},
 			{
-				"name": "Clear Down Tables",
+				"name": "Clear Down Table",
 				"type": "Script",
 				"dependsOn": [],
 				"policy": {
@@ -73,11 +73,11 @@
 				}
 			},
 			{
-				"name": "Record Load Metadata",
+				"name": "Record Load Metadatas",
 				"type": "Script",
 				"dependsOn": [
 					{
-						"activity": "Clear Down Tables",
+						"activity": "Clear Down Table",
 						"dependencyConditions": [
 							"Succeeded"
 						]
