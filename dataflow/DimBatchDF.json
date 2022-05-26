@@ -9,7 +9,7 @@
 						"referenceName": "MaxMinBatchfileDS",
 						"type": "DatasetReference"
 					},
-					"name": "BatchFiles"
+					"name": "BatchFile"
 				}
 			],
 			"sinks": [
@@ -41,8 +41,8 @@
 				"     ),",
 				"     allowSchemaDrift: false,",
 				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false) ~> BatchFiles",
-				"BatchFiles derive(BatchName = toString(BatchNumber),",
+				"     ignoreNoFilesFound: false) ~> BatchFile",
+				"BatchFile derive(BatchName = toString(BatchNumber),",
 				"          BatchNumber = toInteger(BatchNumber)) ~> ConvertToBatchName",
 				"ConvertToBatchName sink(allowSchemaDrift: false,",
 				"     validateSchema: false,",
