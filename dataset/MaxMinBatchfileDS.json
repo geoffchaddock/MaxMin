@@ -24,7 +24,6 @@
 				"container": "landing"
 			},
 			"columnDelimiter": ",",
-			"compressionCodec": "bzip2",
 			"escapeChar": "\\",
 			"firstRowAsHeader": true,
 			"quoteChar": "\""
