@@ -1,0 +1,516 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "HEDDFUK"
+		},
+		"AzureBlobStorage1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
+		},
+		"AzureSqlDatabase1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabase1'"
+		},
+		"MaxMinBatchFileLS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'MaxMinBatchFileLS'"
+		},
+		"MaxMinSaleLS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'MaxMinSaleLS'"
+		},
+		"MaxMinSale_ArchiveLS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'MaxMinSale_ArchiveLS'"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/ImportManufacturingDataPL')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "DimBatchDFs",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "Record Load Metadatas",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "1.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "DimBatchDF",
+								"type": "DataFlowReference",
+								"parameters": {
+									"BatchFile": {
+										"value": "'@{pipeline().parameters.BatchFile}'",
+										"type": "Expression"
+									}
+								},
+								"datasetParameters": {
+									"BatchFile": {
+										"BatchFileImport": {
+											"value": "@pipeline().parameters.BatchFile",
+											"type": "Expression"
+										}
+									},
+									"DimBatch": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "Clear Down Table",
+						"type": "Script",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "MaxMinSaleLS",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": "truncate table manufacturing.DimBatch"
+								}
+							]
+						}
+					},
+					{
+						"name": "Record Load Metadatas",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "Clear Down Table",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "MaxMinSaleLS",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "NonQuery",
+									"text": {
+										"value": "@concat('insert into dba.BatchFileLoadHistory select ''', pipeline().parameters.BatchFile, ''', getdate() , ''', pipeline().RunId, '''')\n\n\n",
+										"type": "Expression"
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"BatchFile": {
+						"type": "string",
+						"defaultValue": "Mar.csv"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/DimBatchDF')]",
+				"[concat(variables('factoryId'), '/linkedServices/MaxMinSaleLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MaxMinBatchfileDSt')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "MaxMinBatchFileLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"BatchFileImport": {
+						"type": "string",
+						"defaultValue": "jan.csv"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().BatchFileImport",
+							"type": "Expression"
+						},
+						"folderPath": "BatchFiles",
+						"container": "landing"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "BatchNumber",
+						"type": "String"
+					},
+					{
+						"name": "MachineNumber",
+						"type": "String"
+					},
+					{
+						"name": "ProductCode",
+						"type": "String"
+					},
+					{
+						"name": "TimeStarted",
+						"type": "String"
+					},
+					{
+						"name": "TimeStopped",
+						"type": "String"
+					},
+					{
+						"name": "NumberProduced",
+						"type": "String"
+					},
+					{
+						"name": "NumberRejected",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/MaxMinBatchFileLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MaxMinDimBatchDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "MaxMinSaleLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "BatchNumber",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "BatchName",
+						"type": "nvarchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "Manufacturing",
+					"table": "DimBatch"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/MaxMinSaleLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MaxMinSale_ArchiveDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "MaxMinSale_ArchiveLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "PK_Sales_Information_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "FK_Time",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "FK_Customer",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "FK_Product",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "FK_Promotion",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "FK_Sales_Person",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "FK_Store",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Sales_in_Dollars",
+						"type": "money",
+						"precision": 19,
+						"scale": 4
+					},
+					{
+						"name": "Sales_in_Units",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Sales_Tax",
+						"type": "money",
+						"precision": 19,
+						"scale": 4
+					},
+					{
+						"name": "Shipping",
+						"type": "money",
+						"precision": 19,
+						"scale": 4
+					},
+					{
+						"name": "DateArchived",
+						"type": "smalldatetime",
+						"precision": 16,
+						"scale": 0
+					},
+					{
+						"name": "PipelineID",
+						"type": "uniqueidentifier"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Sales_Information"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/MaxMinSale_ArchiveLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MaxMinSalesDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "MaxMinSaleLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "Sales",
+					"table": "Sales_Information_Staging"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/MaxMinSaleLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureBlobStorage1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureBlobStorage1_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlDatabase1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureSqlDatabase1_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MaxMinBatchFileLS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('MaxMinBatchFileLS_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MaxMinSaleLS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('MaxMinSaleLS_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MaxMinSale_ArchiveLS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('MaxMinSale_ArchiveLS_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DimBatchDF')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "MaxMinBatchfileDSt",
+								"type": "DatasetReference"
+							},
+							"name": "BatchFile"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "MaxMinDimBatchDS",
+								"type": "DatasetReference"
+							},
+							"name": "DimBatch"
+						}
+					],
+					"transformations": [
+						{
+							"name": "ConvertToBatchName"
+						}
+					],
+					"scriptLines": [
+						"parameters{",
+						"     BatchFile as string",
+						"}",
+						"source(output(",
+						"          BatchNumber as string,",
+						"          MachineNumber as string,",
+						"          ProductCode as string,",
+						"          TimeStarted as string,",
+						"          TimeStopped as string,",
+						"          NumberProduced as string,",
+						"          NumberRejected as string",
+						"     ),",
+						"     allowSchemaDrift: false,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> BatchFile",
+						"BatchFile derive(BatchName = toString(BatchNumber),",
+						"          BatchNumber = toInteger(BatchNumber)) ~> ConvertToBatchName",
+						"ConvertToBatchName sink(allowSchemaDrift: false,",
+						"     validateSchema: false,",
+						"     input(",
+						"          BatchNumber as integer,",
+						"          BatchName as string",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          BatchNumber,",
+						"          BatchName",
+						"     )) ~> DimBatch"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/MaxMinBatchfileDSt')]",
+				"[concat(variables('factoryId'), '/datasets/MaxMinDimBatchDS')]"
+			]
+		}
+	]
+}
