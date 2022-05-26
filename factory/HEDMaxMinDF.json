@@ -1,0 +1,9 @@
+{
+	"name": "HEDMaxMinDF",
+	"location": "ukwest",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "201c5753-a841-4897-acf4-4459879e8fc9",
+		"tenantId": "26838705-b8cf-4fb4-a9d3-1a14c2717e5c"
+	}
+}
