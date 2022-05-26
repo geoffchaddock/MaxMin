@@ -6,7 +6,7 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "MaxMinBatchfileDS",
+						"referenceName": "MaxMinBatchfileDSt",
 						"type": "DatasetReference"
 					},
 					"name": "BatchFile"
