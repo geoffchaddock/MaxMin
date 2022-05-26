@@ -44,7 +44,7 @@
 				"     ignoreNoFilesFound: false) ~> BatchFile",
 				"BatchFile derive(BatchName = toString(BatchNumber),",
 				"          BatchNumber = toInteger(BatchNumber)) ~> ConvertToBatchName",
-				"ConvertToBatchName sink(allowSchemaDrift: true,",
+				"ConvertToBatchName sink(allowSchemaDrift: false,",
 				"     validateSchema: false,",
 				"     input(",
 				"          BatchNumber as integer,",
