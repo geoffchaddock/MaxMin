@@ -1,5 +1,5 @@
 {
-	"name": "MaxMinDimBatch",
+	"name": "MaxMinDimBatchDS",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "MaxMinSaleLS",
