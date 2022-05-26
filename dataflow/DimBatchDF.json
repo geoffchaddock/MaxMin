@@ -40,7 +40,7 @@
 				"          NumberRejected as string",
 				"     ),",
 				"     allowSchemaDrift: false,",
-				"     validateSchema: true,",
+				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> BatchFiles",
 				"BatchFiles derive(BatchName = toString(BatchNumber),",
 				"          BatchNumber = toInteger(BatchNumber)) ~> ConvertToBatchName",
