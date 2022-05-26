@@ -114,9 +114,6 @@
 				"defaultValue": "Mar.csv"
 			}
 		},
-		"folder": {
-			"name": "MaxMinSalesEOYProcess"
-		},
 		"annotations": []
 	}
 }
