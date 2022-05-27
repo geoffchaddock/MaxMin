@@ -501,8 +501,7 @@
 				},
 				"parameters": {
 					"BatchFile": {
-						"type": "string",
-						"defaultValue": "Mar.csv"
+						"type": "string"
 					}
 				},
 				"annotations": []
