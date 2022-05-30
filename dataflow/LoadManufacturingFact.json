@@ -1,0 +1,47 @@
+{
+	"name": "LoadManufacturingFact",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "MaxMinBatchfileDSt",
+						"type": "DatasetReference"
+					},
+					"name": "BatchFile"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "CreateDerivedColumns"
+				}
+			],
+			"scriptLines": [
+				"parameters{",
+				"     BatchFile as string",
+				"}",
+				"source(output(",
+				"          BatchNumber as string,",
+				"          MachineNumber as string,",
+				"          ProductCode as string,",
+				"          TimeStarted as string,",
+				"          TimeStopped as string,",
+				"          NumberProduced as string,",
+				"          NumberRejected as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> BatchFile",
+				"BatchFile derive(AcceptedProducts = toInteger(NumberProduced) -  toInteger(NumberRejected)\r",
+				"\r",
+				",",
+				"          ElapsedTimeForManufacture = minus(toDate(TimeStarted), toDate(TimeStopped)) \r",
+				"\r",
+				",",
+				"          DateOfManufacture = ERROR_FUNCTION('')) ~> CreateDerivedColumns"
+			]
+		}
+	}
+}
