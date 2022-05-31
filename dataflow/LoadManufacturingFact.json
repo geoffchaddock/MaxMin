@@ -24,6 +24,13 @@
 						"type": "DatasetReference"
 					},
 					"name": "DimProduct"
+				},
+				{
+					"dataset": {
+						"referenceName": "ManufacturingFactDS",
+						"type": "DatasetReference"
+					},
+					"name": "ExistingManufacturingFact"
 				}
 			],
 			"sinks": [
@@ -47,6 +54,12 @@
 				},
 				{
 					"name": "selectNeededColumns"
+				},
+				{
+					"name": "alterRow1"
+				},
+				{
+					"name": "LookupExistingManufacturingFact"
 				}
 			],
 			"scriptLines": [
@@ -87,6 +100,19 @@
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     query: 'select ProductCode, ProductName, ProductSubtypeCode from [Manufacturing].[DimProduct]',",
 				"     format: 'query') ~> DimProduct",
+				"source(output(",
+				"          AcceptedProducts as integer,",
+				"          RejectedProducts as integer,",
+				"          ElapsedTimeForManufacture as decimal(6,2),",
+				"          DateOfManufacture as timestamp,",
+				"          ProductCode as integer,",
+				"          BatchNumber as integer,",
+				"          MachineNumber as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> ExistingManufacturingFact",
 				"BatchFile derive(AcceptedProducts = toInteger(NumberProduced) -  toInteger(NumberRejected),",
 				"          ElapsedTimeForManufacture = 100,",
 				"          DateOfManufacture = toTimestamp(TimeStarted, 'dd/MM/yyyy') ) ~> CreateDerivedColumns",
@@ -106,11 +132,20 @@
 				"          AcceptedProducts,",
 				"          ElapsedTimeForManufacture,",
 				"          DateOfManufacture,",
-				"          MachineName",
+				"          MachineName,",
+				"          MachineNumber = DimMachine@MachineNumber",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> selectNeededColumns",
-				"selectNeededColumns sink(allowSchemaDrift: true,",
+				"LookupExistingManufacturingFact alterRow() ~> alterRow1",
+				"selectNeededColumns, ExistingManufacturingFact lookup(selectNeededColumns@DateOfManufacture == ExistingManufacturingFact@DateOfManufacture",
+				"     && selectNeededColumns@BatchNumber == ExistingManufacturingFact@BatchNumber",
+				"     && selectNeededColumns@ProductCode == ExistingManufacturingFact@ProductCode",
+				"     && selectNeededColumns@MachineNumber == ERROR_FUNCTION(''),",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> LookupExistingManufacturingFact",
+				"alterRow1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          AcceptedProducts as integer,",
