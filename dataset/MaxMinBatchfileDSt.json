@@ -17,7 +17,7 @@
 			"location": {
 				"type": "AzureBlobStorageLocation",
 				"fileName": {
-					"value": "@dataset().BatchFileImport",
+					"value": "Apr.csv",
 					"type": "Expression"
 				},
 				"folderPath": "BatchFiles",
