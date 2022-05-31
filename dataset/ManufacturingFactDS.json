@@ -1,0 +1,54 @@
+{
+	"name": "ManufacturingFactDS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "MaxMinSaleLS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "AcceptedProducts",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "RejectedProducts",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ElapsedTimeForManufacture",
+				"type": "decimal",
+				"precision": 6,
+				"scale": 2
+			},
+			{
+				"name": "DateOfManufacture",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "ProductCode",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "BatchNumber",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "MachineNumber",
+				"type": "int",
+				"precision": 10
+			}
+		],
+		"typeProperties": {
+			"schema": "Manufacturing",
+			"table": "ManufacturingFact"
+		}
+	}
+}

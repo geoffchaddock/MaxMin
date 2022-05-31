@@ -26,7 +26,15 @@
 					"name": "DimProduct"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ManufacturingFactDS",
+						"type": "DatasetReference"
+					},
+					"name": "ManufacturingFact"
+				}
+			],
 			"transformations": [
 				{
 					"name": "CreateDerivedColumns"
@@ -36,6 +44,9 @@
 				},
 				{
 					"name": "lookupProduct"
+				},
+				{
+					"name": "selectNeededColumns"
 				}
 			],
 			"scriptLines": [
@@ -43,13 +54,13 @@
 				"     BatchFile as string",
 				"}",
 				"source(output(",
-				"          BatchNumber as string,",
-				"          MachineNumber as string,",
-				"          ProductCode as string,",
+				"          BatchNumber as short,",
+				"          MachineNumber as short,",
+				"          ProductCode as short,",
 				"          TimeStarted as string,",
 				"          TimeStopped as string,",
-				"          NumberProduced as string,",
-				"          NumberRejected as string",
+				"          NumberProduced as short,",
+				"          NumberRejected as short",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
@@ -74,20 +85,59 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     query: 'select ProductCode, ProductName from [Manufacturing].[DimProduct]',",
+				"     query: 'select ProductCode, ProductName, ProductSubtypeCode from [Manufacturing].[DimProduct]',",
 				"     format: 'query') ~> DimProduct",
 				"BatchFile derive(AcceptedProducts = toInteger(NumberProduced) -  toInteger(NumberRejected),",
-				"          ElapsedTimeForManufacture = minus(toDate(TimeStarted), toDate(TimeStopped)),",
-				"          DateOfManufacture = toTimestamp(substring(TimeStarted, 1, 10))\r",
-				") ~> CreateDerivedColumns",
+				"          ElapsedTimeForManufacture = 100,",
+				"          DateOfManufacture = toTimestamp(TimeStarted, 'dd/MM/yyyy') ) ~> CreateDerivedColumns",
 				"CreateDerivedColumns, DimMachine lookup(BatchFile@MachineNumber == DimMachine@MachineNumber,",
 				"     multiple: false,",
 				"     pickup: 'any',",
 				"     broadcast: 'auto')~> lookupMachineNumber",
-				"lookupMachineNumber lookup(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
+				"lookupMachineNumber, DimProduct lookup(BatchFile@ProductCode == DimProduct@ProductCode,",
 				"     multiple: false,",
 				"     pickup: 'any',",
-				"     broadcast: 'auto')~> lookupProduct"
+				"     broadcast: 'auto')~> lookupProduct",
+				"lookupProduct select(mapColumn(",
+				"          BatchNumber,",
+				"          MachineNumber = BatchFile@MachineNumber,",
+				"          ProductCode = BatchFile@ProductCode,",
+				"          NumberRejected,",
+				"          AcceptedProducts,",
+				"          ElapsedTimeForManufacture,",
+				"          DateOfManufacture,",
+				"          MachineName",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selectNeededColumns",
+				"selectNeededColumns sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          AcceptedProducts as integer,",
+				"          RejectedProducts as integer,",
+				"          ElapsedTimeForManufacture as decimal(6,2),",
+				"          DateOfManufacture as timestamp,",
+				"          ProductCode as integer,",
+				"          BatchNumber as integer,",
+				"          MachineNumber as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          AcceptedProducts,",
+				"          RejectedProducts = NumberRejected,",
+				"          ElapsedTimeForManufacture,",
+				"          DateOfManufacture,",
+				"          ProductCode,",
+				"          BatchNumber,",
+				"          MachineNumber",
+				"     )) ~> ManufacturingFact"
 			]
 		}
 	}
