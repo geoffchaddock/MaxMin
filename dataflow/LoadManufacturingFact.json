@@ -40,7 +40,7 @@
 			],
 			"scriptLines": [
 				"parameters{",
-				"     BatchFile as string (\"aug.csv\")",
+				"     BatchFile as string",
 				"}",
 				"source(output(",
 				"          BatchNumber as string,",

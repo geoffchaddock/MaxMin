@@ -8,7 +8,7 @@
 		"parameters": {
 			"BatchFileImport": {
 				"type": "string",
-				"defaultValue": "apr.csv"
+				"defaultValue": "Apr.csv"
 			}
 		},
 		"annotations": [],
