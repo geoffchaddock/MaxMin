@@ -10,17 +10,37 @@
 						"type": "DatasetReference"
 					},
 					"name": "BatchFile"
+				},
+				{
+					"dataset": {
+						"referenceName": "DimMachineDS",
+						"type": "DatasetReference"
+					},
+					"name": "DimMachine"
+				},
+				{
+					"dataset": {
+						"referenceName": "DimProductDS",
+						"type": "DatasetReference"
+					},
+					"name": "DimProduct"
 				}
 			],
 			"sinks": [],
 			"transformations": [
 				{
 					"name": "CreateDerivedColumns"
+				},
+				{
+					"name": "lookupMachineNumber"
+				},
+				{
+					"name": "lookupProduct"
 				}
 			],
 			"scriptLines": [
 				"parameters{",
-				"     BatchFile as string",
+				"     BatchFile as string (\"aug.csv\")",
 				"}",
 				"source(output(",
 				"          BatchNumber as string,",
@@ -34,13 +54,40 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> BatchFile",
-				"BatchFile derive(AcceptedProducts = toInteger(NumberProduced) -  toInteger(NumberRejected)\r",
-				"\r",
-				",",
-				"          ElapsedTimeForManufacture = minus(toDate(TimeStarted), toDate(TimeStopped)) \r",
-				"\r",
-				",",
-				"          DateOfManufacture = ERROR_FUNCTION('')) ~> CreateDerivedColumns"
+				"source(output(",
+				"          MachineNumber as integer,",
+				"          MachineName as string,",
+				"          MachineType as string,",
+				"          PlantNumber as integer,",
+				"          Manufacturer as string,",
+				"          DateOfPurchase as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> DimMachine",
+				"source(output(",
+				"          ProductCode as integer,",
+				"          ProductName as string,",
+				"          ProductSubtypeCode as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'select ProductCode, ProductName from [Manufacturing].[DimProduct]',",
+				"     format: 'query') ~> DimProduct",
+				"BatchFile derive(AcceptedProducts = toInteger(NumberProduced) -  toInteger(NumberRejected),",
+				"          ElapsedTimeForManufacture = minus(toDate(TimeStarted), toDate(TimeStopped)),",
+				"          DateOfManufacture = toTimestamp(substring(TimeStarted, 1, 10))\r",
+				") ~> CreateDerivedColumns",
+				"CreateDerivedColumns, DimMachine lookup(BatchFile@MachineNumber == DimMachine@MachineNumber,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookupMachineNumber",
+				"lookupMachineNumber lookup(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookupProduct"
 			]
 		}
 	}

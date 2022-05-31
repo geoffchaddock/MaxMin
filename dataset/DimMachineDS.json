@@ -1,0 +1,45 @@
+{
+	"name": "DimMachineDS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "MaxMinSaleLS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "MachineNumber",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "MachineName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "MachineType",
+				"type": "nvarchar"
+			},
+			{
+				"name": "PlantNumber",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Manufacturer",
+				"type": "nvarchar"
+			},
+			{
+				"name": "DateOfPurchase",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			}
+		],
+		"typeProperties": {
+			"schema": "Manufacturing",
+			"table": "DimMachine"
+		}
+	}
+}

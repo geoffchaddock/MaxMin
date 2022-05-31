@@ -1,0 +1,31 @@
+{
+	"name": "DimProductDS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "MaxMinSaleLS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "ProductCode",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ProductName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ProductSubtypeCode",
+				"type": "int",
+				"precision": 10
+			}
+		],
+		"typeProperties": {
+			"schema": "Manufacturing",
+			"table": "DimProduct"
+		}
+	}
+}
