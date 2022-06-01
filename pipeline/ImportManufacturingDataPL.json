@@ -3,51 +3,6 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "DimBatchDFs",
-				"type": "ExecuteDataFlow",
-				"dependsOn": [
-					{
-						"activity": "Record Load Metadatas",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "1.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataflow": {
-						"referenceName": "DimBatchDF",
-						"type": "DataFlowReference",
-						"parameters": {
-							"BatchFile": {
-								"value": "'@{pipeline().parameters.BatchFile}'",
-								"type": "Expression"
-							}
-						},
-						"datasetParameters": {
-							"BatchFile": {
-								"BatchFileImport": {
-									"value": "@pipeline().parameters.BatchFile",
-									"type": "Expression"
-								}
-							}
-						}
-					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					},
-					"traceLevel": "Fine"
-				}
-			},
-			{
 				"name": "Clear Down Table",
 				"type": "Script",
 				"dependsOn": [],
@@ -112,7 +67,7 @@
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
-						"activity": "DimBatchDFs",
+						"activity": "Record Load Metadatas",
 						"dependencyConditions": [
 							"Succeeded"
 						]

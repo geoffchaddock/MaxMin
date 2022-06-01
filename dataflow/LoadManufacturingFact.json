@@ -158,7 +158,7 @@
 				"          MachineNumber as integer",
 				"     ),",
 				"     deletable:false,",
-				"     insertable:false,",
+				"     insertable:true,",
 				"     updateable:false,",
 				"     upsertable:true,",
 				"     keys:['BatchNumber','MachineNumber','ProductCode'],",
