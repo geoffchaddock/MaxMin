@@ -165,7 +165,16 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> ManufacturingFact"
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          AcceptedProducts = selectNeededColumns@AcceptedProducts,",
+				"          RejectedProducts,",
+				"          ElapsedTimeForManufacture = selectNeededColumns@ElapsedTimeForManufacture,",
+				"          DateOfManufacture = selectNeededColumns@DateOfManufacture,",
+				"          ProductCode = selectNeededColumns@ProductCode,",
+				"          BatchNumber = selectNeededColumns@BatchNumber,",
+				"          MachineNumber = selectNeededColumns@MachineNumber",
+				"     )) ~> ManufacturingFact"
 			]
 		}
 	}
