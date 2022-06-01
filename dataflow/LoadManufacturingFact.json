@@ -137,7 +137,7 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> selectNeededColumns",
-				"LookupExistingManufacturingFact alterRow(updateIf(isNull(ExistingManufacturingFact@ProductCode) && isNull(ExistingManufacturingFact@BatchNumber) && isNull(ExistingManufacturingFact@MachineNumber)\r",
+				"LookupExistingManufacturingFact alterRow(updateIf(isNull(ExistingManufacturingFact@ProductCode) == false() && isNull(ExistingManufacturingFact@BatchNumber) == false() && isNull(ExistingManufacturingFact@MachineNumber) == false()\r",
 				")) ~> alterRow1",
 				"selectNeededColumns, ExistingManufacturingFact lookup(selectNeededColumns@DateOfManufacture == ExistingManufacturingFact@DateOfManufacture",
 				"     && selectNeededColumns@BatchNumber == ExistingManufacturingFact@BatchNumber",
