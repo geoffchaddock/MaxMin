@@ -158,22 +158,14 @@
 				"          MachineNumber as integer",
 				"     ),",
 				"     deletable:false,",
-				"     insertable:true,",
+				"     insertable:false,",
 				"     updateable:false,",
 				"     upsertable:true,",
+				"     keys:['BatchNumber','MachineNumber','ProductCode'],",
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError',",
-				"     mapColumn(",
-				"          AcceptedProducts,",
-				"          RejectedProducts = NumberRejected,",
-				"          ElapsedTimeForManufacture,",
-				"          DateOfManufacture,",
-				"          ProductCode,",
-				"          BatchNumber,",
-				"          MachineNumber",
-				"     )) ~> ManufacturingFact"
+				"     errorHandlingOption: 'stopOnFirstError') ~> ManufacturingFact"
 			]
 		}
 	}
