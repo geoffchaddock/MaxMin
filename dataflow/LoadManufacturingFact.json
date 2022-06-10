@@ -167,7 +167,7 @@
 				"     errorHandlingOption: 'stopOnFirstError',",
 				"     mapColumn(",
 				"          AcceptedProducts = selectNeededColumns@AcceptedProducts,",
-				"          RejectedProducts = selectNeededColumns@AcceptedProducts,",
+				"          RejectedProducts = NumberRejected,",
 				"          ElapsedTimeForManufacture = selectNeededColumns@ElapsedTimeForManufacture,",
 				"          DateOfManufacture = selectNeededColumns@DateOfManufacture,",
 				"          ProductCode = selectNeededColumns@ProductCode,",
