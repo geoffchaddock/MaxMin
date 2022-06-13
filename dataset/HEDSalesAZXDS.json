@@ -1,0 +1,40 @@
+{
+	"name": "HEDSalesAZXDS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "HEDSalesAZXLS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureDataExplorerTable",
+		"schema": [
+			{
+				"name": "Retailer",
+				"type": "string"
+			},
+			{
+				"name": "SkuCode",
+				"type": "long"
+			},
+			{
+				"name": "Product",
+				"type": "string"
+			},
+			{
+				"name": "SalesMonth",
+				"type": "datetime"
+			},
+			{
+				"name": "SalesValue",
+				"type": "real"
+			},
+			{
+				"name": "UnitsSold",
+				"type": "long"
+			}
+		],
+		"typeProperties": {
+			"table": "tbkHedSalesUK"
+		}
+	}
+}
