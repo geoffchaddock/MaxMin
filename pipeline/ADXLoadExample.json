@@ -16,34 +16,32 @@
 				"userProperties": [],
 				"typeProperties": {
 					"source": {
-						"type": "DelimitedTextSource",
+						"type": "JsonSource",
 						"storeSettings": {
-							"type": "AzureBlobFSReadSettings",
+							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
-							"wildcardFileName": "*",
+							"wildcardFolderPath": "SampleData",
+							"wildcardFileName": "*.json",
 							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
+							"type": "JsonReadSettings"
 						}
 					},
 					"sink": {
-						"type": "AzureDataExplorerSink"
+						"type": "AzureDataExplorerSink",
+						"ingestionMappingName": "Map1"
 					},
 					"enableStaging": false,
 					"enableSkipIncompatibleRow": false,
 					"translator": {
 						"type": "TabularTranslator",
-						"typeConversion": true,
-						"typeConversionSettings": {
-							"allowDataTruncation": true,
-							"treatBooleanAsNumber": false
-						}
+						"mapComplexValuesToString": true
 					}
 				},
 				"inputs": [
 					{
-						"referenceName": "SalesCSVDS",
+						"referenceName": "JsonHedSalesDS",
 						"type": "DatasetReference"
 					}
 				],

@@ -1,0 +1,46 @@
+{
+	"name": "JsonHedSalesDS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": "SampleData",
+				"container": "hed-sales-uk-con"
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"TransactionId": {
+					"type": "string"
+				},
+				"TransactionDate": {
+					"type": "string"
+				},
+				"StoreId": {
+					"type": "string"
+				},
+				"Items": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"Product": {
+								"type": "string"
+							},
+							"Price": {
+								"type": "number"
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

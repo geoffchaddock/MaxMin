@@ -9,28 +9,28 @@
 		"type": "AzureDataExplorerTable",
 		"schema": [
 			{
-				"name": "Retailer",
-				"type": "string"
+				"name": "SalesMonth",
+				"type": "datetime"
 			},
 			{
-				"name": "SkuCode",
-				"type": "long"
+				"name": "Retailer",
+				"type": "string"
 			},
 			{
 				"name": "Product",
 				"type": "string"
 			},
 			{
-				"name": "SalesMonth",
-				"type": "datetime"
-			},
-			{
-				"name": "SalesValue",
+				"name": "SalesValueUSD",
 				"type": "real"
 			},
 			{
 				"name": "UnitsSold",
 				"type": "long"
+			},
+			{
+				"name": "PipelineRunId",
+				"type": "guid"
 			}
 		],
 		"typeProperties": {
