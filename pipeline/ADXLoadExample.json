@@ -43,6 +43,27 @@
 					"enableSkipIncompatibleRow": false,
 					"translator": {
 						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "$['Items']"
+								},
+								"sink": {
+									"name": "Product",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['Price']"
+								},
+								"sink": {
+									"name": "SalesValue",
+									"type": "Double"
+								}
+							}
+						],
+						"collectionReference": "",
 						"mapComplexValuesToString": true
 					}
 				},
