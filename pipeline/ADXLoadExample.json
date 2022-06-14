@@ -46,7 +46,34 @@
 						"mappings": [
 							{
 								"source": {
-									"path": "$['Items']"
+									"path": "$['TransactionId']"
+								},
+								"sink": {
+									"name": "PipelineRunId",
+									"type": "Guid"
+								}
+							},
+							{
+								"source": {
+									"path": "$['TransactionDate']"
+								},
+								"sink": {
+									"name": "SalesMonth",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"path": "$['StoreId']"
+								},
+								"sink": {
+									"name": "Retailer",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['Items'][0]['Product']"
 								},
 								"sink": {
 									"name": "Product",
@@ -55,16 +82,12 @@
 							},
 							{
 								"source": {
-									"path": "$['Price']"
-								},
-								"sink": {
-									"name": "SalesValue",
-									"type": "Double"
+									"path": "$['Items'][0]['Price']"
 								}
 							}
 						],
 						"collectionReference": "",
-						"mapComplexValuesToString": true
+						"mapComplexValuesToString": false
 					}
 				},
 				"inputs": [
