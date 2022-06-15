@@ -127,6 +127,121 @@
 					"referenceName": "HEDSalesAZXLS",
 					"type": "LinkedServiceReference"
 				}
+			},
+			{
+				"name": "Copy Sumerized Data to SQL",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Load JSON Sales Data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureDataExplorerSource",
+						"additionalColumns": [
+							{
+								"name": "InsertDate",
+								"value": {
+									"value": "@utcnow()",
+									"type": "Expression"
+								}
+							}
+						],
+						"query": "tbkHedSalesUK\n| project  PipelineRunId, SalesValueUSD, Product\n| join ( \n        tbkHedSalesUK\n        | summarize NumProductsPerTran = count() by PipelineRunId\n        | where NumProductsPerTran > 1\n    ) on PipelineRunId  \n",
+						"queryTimeout": "00:40:00",
+						"noTruncation": false
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "truncate table ReportingMI.RepHedTopSales",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "PipelineRunId",
+									"type": "Guid",
+									"physicalType": "guid"
+								},
+								"sink": {
+									"name": "PipelineRunId",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								}
+							},
+							{
+								"source": {
+									"name": "SalesValueUSD",
+									"type": "Double",
+									"physicalType": "real"
+								},
+								"sink": {
+									"name": "SalesValueUSD",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 2,
+									"precision": 8
+								}
+							},
+							{
+								"source": {
+									"name": "Product",
+									"type": "String",
+									"physicalType": "string"
+								},
+								"sink": {
+									"name": "Product",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "InsertDate"
+								},
+								"sink": {
+									"name": "DateInserted",
+									"type": "DateTime",
+									"physicalType": "smalldatetime"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "HEDSalesAZXDS",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "HedSalesSummarizeDS",
+						"type": "DatasetReference"
+					}
+				]
 			}
 		],
 		"annotations": []
