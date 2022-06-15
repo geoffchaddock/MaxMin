@@ -159,7 +159,7 @@
 								}
 							}
 						],
-						"query": "tbkHedSalesUK\n| project  PipelineRunId, SalesValueUSD, Product\n| join ( \n        tbkHedSalesUK\n        | summarize NumProductsPerTran = count() by PipelineRunId\n        | where NumProductsPerTran > 1\n    ) on PipelineRunId  \n",
+						"query": "\ntbkHedSalesUK\n| summarize MaxSalesValueUSD = max(SalesValueUSD) by PipelineRunId\n| join ( \n        tbkHedSalesUK\n        | summarize NumProductsPerTran = count() by PipelineRunId\n        | where NumProductsPerTran > 1\n    ) on PipelineRunId  \n| where PipelineRunId == \"565C4ACB-3CC4-4F11-85CE-EDD1D1A58896\" \n    or PipelineRunId == \"1D0B3DB8-F8E7-40D0-A636-FF8A93AA256E\"\n| project  PipelineRunId, MaxSalesValueUSD, \"TmpProdcode\"\n",
 						"queryTimeout": "00:40:00",
 						"noTruncation": false
 					},
