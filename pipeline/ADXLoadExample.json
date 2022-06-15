@@ -3,11 +3,11 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Copy data1",
+				"name": "Load JSON Sales Data",
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "Azure Data Explorer Command1",
+						"activity": "Clear Down Sales Table",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -27,7 +27,7 @@
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
-							"wildcardFolderPath": "SampleData",
+							"wildcardFolderPath": "SampleData/HandyCandy",
 							"wildcardFileName": "*.json",
 							"enablePartitionDiscovery": false
 						},
@@ -108,7 +108,7 @@
 				]
 			},
 			{
-				"name": "Azure Data Explorer Command1",
+				"name": "Clear Down Sales Table",
 				"type": "AzureDataExplorerCommand",
 				"dependsOn": [],
 				"policy": {
