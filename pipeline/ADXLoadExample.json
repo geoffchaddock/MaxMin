@@ -188,7 +188,7 @@
 							},
 							{
 								"source": {
-									"name": "SalesValueUSD",
+									"name": "MaxSalesValueUSD",
 									"type": "Double",
 									"physicalType": "real"
 								},
@@ -202,7 +202,7 @@
 							},
 							{
 								"source": {
-									"name": "Product",
+									"name": "Column1",
 									"type": "String",
 									"physicalType": "string"
 								},
