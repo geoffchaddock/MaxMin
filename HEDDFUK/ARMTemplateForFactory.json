@@ -433,7 +433,8 @@
 				},
 				"parameters": {
 					"BatchFile": {
-						"type": "string"
+						"type": "string",
+						"defaultValue": "Aug.csv"
 					}
 				},
 				"annotations": []
@@ -746,10 +747,6 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobStorageLocation",
-						"fileName": {
-							"value": "Apr.csv",
-							"type": "Expression"
-						},
 						"folderPath": "BatchFiles",
 						"container": "landing"
 					},

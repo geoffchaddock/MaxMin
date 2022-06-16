@@ -459,10 +459,6 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobStorageLocation",
-						"fileName": {
-							"value": "Apr.csv",
-							"type": "Expression"
-						},
 						"folderPath": "BatchFiles",
 						"container": "landing"
 					},

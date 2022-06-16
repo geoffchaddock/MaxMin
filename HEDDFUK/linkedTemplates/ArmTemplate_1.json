@@ -386,7 +386,8 @@
 				},
 				"parameters": {
 					"BatchFile": {
-						"type": "string"
+						"type": "string",
+						"defaultValue": "Aug.csv"
 					}
 				},
 				"annotations": []
