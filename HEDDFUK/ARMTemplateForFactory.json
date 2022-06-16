@@ -15,6 +15,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabase1'"
 		},
+		"HEDSalesADLGen2DL_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'HEDSalesADLGen2DL'"
+		},
 		"MaxMinBatchFileLS_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'MaxMinBatchFileLS'"
@@ -26,6 +30,18 @@
 		"MaxMinSale_ArchiveLS_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'MaxMinSale_ArchiveLS'"
+		},
+		"HEDSalesADLGen2DL_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://hedsadl.dfs.core.windows.net/"
+		},
+		"HEDSalesAZXLS_properties_typeProperties_endpoint": {
+			"type": "string",
+			"defaultValue": "https://hedukade.ukwest.kusto.windows.net"
+		},
+		"HEDSalesAZXLS_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "dbHEDSalesUK"
 		}
 	},
 	"variables": {
@@ -33,24 +49,24 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/ImportManufacturingDataPL')]",
+			"name": "[concat(parameters('factoryName'), '/ADXLoadExample')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "DimBatchDFs",
-						"type": "ExecuteDataFlow",
+						"name": "Load JSON Sales Data",
+						"type": "Copy",
 						"dependsOn": [
 							{
-								"activity": "Record Load Metadatas",
+								"activity": "Clear Down Sales Table",
 								"dependencyConditions": [
 									"Succeeded"
 								]
 							}
 						],
 						"policy": {
-							"timeout": "1.00:00:00",
+							"timeout": "7.00:00:00",
 							"retry": 0,
 							"retryIntervalInSeconds": 30,
 							"secureOutput": false,
@@ -58,33 +74,251 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"dataflow": {
-								"referenceName": "DimBatchDF",
-								"type": "DataFlowReference",
-								"parameters": {
-									"BatchFile": {
-										"value": "'@{pipeline().parameters.BatchFile}'",
-										"type": "Expression"
-									}
+							"source": {
+								"type": "JsonSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFolderPath": "SampleData/HandyCandy",
+									"wildcardFileName": "*.json",
+									"enablePartitionDiscovery": false
 								},
-								"datasetParameters": {
-									"BatchFile": {
-										"BatchFileImport": {
-											"value": "@pipeline().parameters.BatchFile",
-											"type": "Expression"
-										}
-									},
-									"DimBatch": {}
+								"formatSettings": {
+									"type": "JsonReadSettings"
 								}
 							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
+							"sink": {
+								"type": "AzureDataExplorerSink",
+								"ingestionMappingName": ""
 							},
-							"traceLevel": "Fine"
+							"enableStaging": false,
+							"enableSkipIncompatibleRow": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"path": "$['TransactionId']"
+										},
+										"sink": {
+											"name": "PipelineRunId",
+											"type": "Guid"
+										}
+									},
+									{
+										"source": {
+											"path": "$['TransactionDate']"
+										},
+										"sink": {
+											"name": "SalesMonth",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"path": "$['StoreId']"
+										},
+										"sink": {
+											"name": "Retailer",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "[['Product']"
+										},
+										"sink": {
+											"name": "Product",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "[['Price']"
+										},
+										"sink": {
+											"name": "SalesValueUSD",
+											"type": "Double"
+										}
+									}
+								],
+								"collectionReference": "$['Items']",
+								"mapComplexValuesToString": false
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "JsonHedSalesDS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "HEDSalesAZXDS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "Clear Down Sales Table",
+						"type": "AzureDataExplorerCommand",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"command": ".clear table tbkHedSalesUK data ",
+							"commandTimeout": "00:20:00"
+						},
+						"linkedServiceName": {
+							"referenceName": "HEDSalesAZXLS",
+							"type": "LinkedServiceReference"
 						}
 					},
+					{
+						"name": "Copy Sumerized Data to SQL",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Load JSON Sales Data",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureDataExplorerSource",
+								"additionalColumns": [
+									{
+										"name": "InsertDate",
+										"value": {
+											"value": "@utcnow()",
+											"type": "Expression"
+										}
+									}
+								],
+								"query": "\ntbkHedSalesUK\n| summarize MaxSalesValueUSD = max(SalesValueUSD) by PipelineRunId\n| join ( \n        tbkHedSalesUK\n        | summarize NumProductsPerTran = count() by PipelineRunId\n        | where NumProductsPerTran > 1\n    ) on PipelineRunId  \n| where PipelineRunId == \"565C4ACB-3CC4-4F11-85CE-EDD1D1A58896\" \n    or PipelineRunId == \"1D0B3DB8-F8E7-40D0-A636-FF8A93AA256E\"\n| project  PipelineRunId, MaxSalesValueUSD, \"TmpProdcode\"\n",
+								"queryTimeout": "00:40:00",
+								"noTruncation": false
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": "truncate table ReportingMI.RepHedTopSales",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "PipelineRunId",
+											"type": "Guid",
+											"physicalType": "guid"
+										},
+										"sink": {
+											"name": "PipelineRunId",
+											"type": "Guid",
+											"physicalType": "uniqueidentifier"
+										}
+									},
+									{
+										"source": {
+											"name": "MaxSalesValueUSD",
+											"type": "Double",
+											"physicalType": "real"
+										},
+										"sink": {
+											"name": "SalesValueUSD",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 2,
+											"precision": 8
+										}
+									},
+									{
+										"source": {
+											"name": "Column1",
+											"type": "String",
+											"physicalType": "string"
+										},
+										"sink": {
+											"name": "Product",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "InsertDate"
+										},
+										"sink": {
+											"name": "DateInserted",
+											"type": "DateTime",
+											"physicalType": "smalldatetime"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "HEDSalesAZXDS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "HedSalesSummarizeDS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/JsonHedSalesDS')]",
+				"[concat(variables('factoryId'), '/datasets/HEDSalesAZXDS')]",
+				"[concat(variables('factoryId'), '/linkedServices/HEDSalesAZXLS')]",
+				"[concat(variables('factoryId'), '/datasets/HedSalesSummarizeDS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ImportManufacturingDataPL')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
 					{
 						"name": "Clear Down Table",
 						"type": "Script",
@@ -144,6 +378,53 @@
 								}
 							]
 						}
+					},
+					{
+						"name": "Load ManufacturingFact",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "Record Load Metadatas",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "1.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "LoadManufacturingFact",
+								"type": "DataFlowReference",
+								"parameters": {
+									"BatchFile": {
+										"value": "'@{pipeline().parameters.BatchFile}'",
+										"type": "Expression"
+									}
+								},
+								"datasetParameters": {
+									"BatchFile": {
+										"BatchFileImport": "Apr.csv"
+									},
+									"DimMachine": {},
+									"DimProduct": {},
+									"ExistingManufacturingFact": {},
+									"ManufacturingFact": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
 					}
 				],
 				"policy": {
@@ -158,7 +439,290 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/DimBatchDF')]",
+				"[concat(variables('factoryId'), '/linkedServices/MaxMinSaleLS')]",
+				"[concat(variables('factoryId'), '/dataflows/LoadManufacturingFact')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DimMachineDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "MaxMinSaleLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "MachineNumber",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "MachineName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "MachineType",
+						"type": "nvarchar"
+					},
+					{
+						"name": "PlantNumber",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Manufacturer",
+						"type": "nvarchar"
+					},
+					{
+						"name": "DateOfPurchase",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "Manufacturing",
+					"table": "DimMachine"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/MaxMinSaleLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DimProductDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "MaxMinSaleLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "ProductCode",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ProductName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ProductSubtypeCode",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "Manufacturing",
+					"table": "DimProduct"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/MaxMinSaleLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/HEDSalesAZXDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "HEDSalesAZXLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureDataExplorerTable",
+				"schema": [
+					{
+						"name": "SalesMonth",
+						"type": "datetime"
+					},
+					{
+						"name": "Retailer",
+						"type": "string"
+					},
+					{
+						"name": "Product",
+						"type": "string"
+					},
+					{
+						"name": "SalesValueUSD",
+						"type": "real"
+					},
+					{
+						"name": "UnitsSold",
+						"type": "long"
+					},
+					{
+						"name": "PipelineRunId",
+						"type": "guid"
+					}
+				],
+				"typeProperties": {
+					"table": "tbkHedSalesUK"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/HEDSalesAZXLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/HedSalesSummarizeDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "MaxMinSaleLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "PipelineRunId",
+						"type": "binary"
+					},
+					{
+						"name": "SalesValueUSD",
+						"type": "decimal",
+						"precision": 8,
+						"scale": 2
+					},
+					{
+						"name": "Product",
+						"type": "varchar"
+					},
+					{
+						"name": "DateInserted",
+						"type": "smalldatetime",
+						"precision": 16,
+						"scale": 0
+					}
+				],
+				"typeProperties": {
+					"schema": "ReportingMI",
+					"table": "RepHedTopSales"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/MaxMinSaleLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/JsonHedSalesDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "SampleData",
+						"container": "hed-sales-uk-con"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"TransactionId": {
+							"type": "string"
+						},
+						"TransactionDate": {
+							"type": "string"
+						},
+						"StoreId": {
+							"type": "string"
+						},
+						"Items": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"Product": {
+										"type": "string"
+									},
+									"Price": {
+										"type": "number"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ManufacturingFactDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "MaxMinSaleLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "AcceptedProducts",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "RejectedProducts",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ElapsedTimeForManufacture",
+						"type": "decimal",
+						"precision": 6,
+						"scale": 2
+					},
+					{
+						"name": "DateOfManufacture",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "ProductCode",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "BatchNumber",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "MachineNumber",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "Manufacturing",
+					"table": "ManufacturingFact"
+				}
+			},
+			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/MaxMinSaleLS')]"
 			]
 		},
@@ -174,7 +738,7 @@
 				"parameters": {
 					"BatchFileImport": {
 						"type": "string",
-						"defaultValue": "jan.csv"
+						"defaultValue": "Apr.csv"
 					}
 				},
 				"annotations": [],
@@ -183,7 +747,7 @@
 					"location": {
 						"type": "AzureBlobStorageLocation",
 						"fileName": {
-							"value": "@dataset().BatchFileImport",
+							"value": "Apr.csv",
 							"type": "Expression"
 						},
 						"folderPath": "BatchFiles",
@@ -373,6 +937,53 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/SalesCSVDS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "HEDSalesADLGen2DL",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "SampleData",
+						"fileSystem": "hed-sales-uk-con"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/HEDSalesADLGen2DL')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/AzureBlobStorage1')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -394,6 +1005,37 @@
 				"type": "AzureSqlDatabase",
 				"typeProperties": {
 					"connectionString": "[parameters('AzureSqlDatabase1_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/HEDSalesADLGen2DL')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('HEDSalesADLGen2DL_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('HEDSalesADLGen2DL_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/HEDSalesAZXLS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDataExplorer",
+				"typeProperties": {
+					"endpoint": "[parameters('HEDSalesAZXLS_properties_typeProperties_endpoint')]",
+					"database": "[parameters('HEDSalesAZXLS_properties_typeProperties_database')]"
 				}
 			},
 			"dependsOn": []
@@ -510,6 +1152,206 @@
 				"[concat(variables('factoryId'), '/datasets/MaxMinBatchfileDSt')]",
 				"[concat(variables('factoryId'), '/datasets/MaxMinDimBatchDS')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LoadManufacturingFact')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "MaxMinBatchfileDSt",
+								"type": "DatasetReference"
+							},
+							"name": "BatchFile"
+						},
+						{
+							"dataset": {
+								"referenceName": "DimMachineDS",
+								"type": "DatasetReference"
+							},
+							"name": "DimMachine"
+						},
+						{
+							"dataset": {
+								"referenceName": "DimProductDS",
+								"type": "DatasetReference"
+							},
+							"name": "DimProduct"
+						},
+						{
+							"dataset": {
+								"referenceName": "ManufacturingFactDS",
+								"type": "DatasetReference"
+							},
+							"name": "ExistingManufacturingFact"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ManufacturingFactDS",
+								"type": "DatasetReference"
+							},
+							"name": "ManufacturingFact"
+						}
+					],
+					"transformations": [
+						{
+							"name": "CreateDerivedColumns"
+						},
+						{
+							"name": "lookupMachineNumber"
+						},
+						{
+							"name": "lookupProduct"
+						},
+						{
+							"name": "selectNeededColumns"
+						},
+						{
+							"name": "alterRow1"
+						},
+						{
+							"name": "LookupExistingManufacturingFact"
+						}
+					],
+					"scriptLines": [
+						"parameters{",
+						"     BatchFile as string",
+						"}",
+						"source(output(",
+						"          BatchNumber as short,",
+						"          MachineNumber as short,",
+						"          ProductCode as short,",
+						"          TimeStarted as string,",
+						"          TimeStopped as string,",
+						"          NumberProduced as short,",
+						"          NumberRejected as short",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> BatchFile",
+						"source(output(",
+						"          MachineNumber as integer,",
+						"          MachineName as string,",
+						"          MachineType as string,",
+						"          PlantNumber as integer,",
+						"          Manufacturer as string,",
+						"          DateOfPurchase as timestamp",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> DimMachine",
+						"source(output(",
+						"          ProductCode as integer,",
+						"          ProductName as string,",
+						"          ProductSubtypeCode as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     query: 'select ProductCode, ProductName, ProductSubtypeCode from [Manufacturing].[DimProduct]',",
+						"     format: 'query') ~> DimProduct",
+						"source(output(",
+						"          AcceptedProducts as integer,",
+						"          RejectedProducts as integer,",
+						"          ElapsedTimeForManufacture as decimal(6,2),",
+						"          DateOfManufacture as timestamp,",
+						"          ProductCode as integer,",
+						"          BatchNumber as integer,",
+						"          MachineNumber as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> ExistingManufacturingFact",
+						"BatchFile derive(AcceptedProducts = toInteger(NumberProduced) -  toInteger(NumberRejected),",
+						"          ElapsedTimeForManufacture = 100,",
+						"          DateOfManufacture = toTimestamp(TimeStarted, 'dd/MM/yyyy')) ~> CreateDerivedColumns",
+						"CreateDerivedColumns, DimMachine lookup(BatchFile@MachineNumber == DimMachine@MachineNumber,",
+						"     multiple: false,",
+						"     pickup: 'any',",
+						"     broadcast: 'auto')~> lookupMachineNumber",
+						"lookupMachineNumber, DimProduct lookup(BatchFile@ProductCode == DimProduct@ProductCode,",
+						"     multiple: false,",
+						"     pickup: 'any',",
+						"     broadcast: 'auto')~> lookupProduct",
+						"lookupProduct select(mapColumn(",
+						"          BatchNumber,",
+						"          MachineNumber = BatchFile@MachineNumber,",
+						"          ProductCode = BatchFile@ProductCode,",
+						"          NumberRejected,",
+						"          AcceptedProducts,",
+						"          ElapsedTimeForManufacture,",
+						"          DateOfManufacture,",
+						"          MachineName,",
+						"          MachineNumber = DimMachine@MachineNumber",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> selectNeededColumns",
+						"LookupExistingManufacturingFact alterRow(updateIf(isNull(ExistingManufacturingFact@ProductCode)==false()&&isNull(ExistingManufacturingFact@BatchNumber)==false()&&isNull(ExistingManufacturingFact@MachineNumber)==false()),",
+						"     insertIf(isNull(ExistingManufacturingFact@ProductCode)==true()&&isNull(ExistingManufacturingFact@BatchNumber)==true()&&isNull(ExistingManufacturingFact@MachineNumber)==true())) ~> alterRow1",
+						"selectNeededColumns, ExistingManufacturingFact lookup(selectNeededColumns@BatchNumber == ExistingManufacturingFact@BatchNumber",
+						"     && selectNeededColumns@ProductCode == ExistingManufacturingFact@ProductCode",
+						"     && selectNeededColumns@MachineNumber == ExistingManufacturingFact@MachineNumber,",
+						"     multiple: false,",
+						"     pickup: 'any',",
+						"     broadcast: 'auto')~> LookupExistingManufacturingFact",
+						"alterRow1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          AcceptedProducts as integer,",
+						"          RejectedProducts as integer,",
+						"          ElapsedTimeForManufacture as decimal(6,2),",
+						"          DateOfManufacture as timestamp,",
+						"          ProductCode as integer,",
+						"          BatchNumber as integer,",
+						"          MachineNumber as integer",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:true,",
+						"     upsertable:true,",
+						"     keys:['BatchNumber','MachineNumber','ProductCode'],",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          AcceptedProducts = selectNeededColumns@AcceptedProducts,",
+						"          RejectedProducts = NumberRejected,",
+						"          ElapsedTimeForManufacture = selectNeededColumns@ElapsedTimeForManufacture,",
+						"          DateOfManufacture = selectNeededColumns@DateOfManufacture,",
+						"          ProductCode = selectNeededColumns@ProductCode,",
+						"          BatchNumber = selectNeededColumns@BatchNumber,",
+						"          MachineNumber = selectNeededColumns@MachineNumber",
+						"     )) ~> ManufacturingFact"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/MaxMinBatchfileDSt')]",
+				"[concat(variables('factoryId'), '/datasets/DimMachineDS')]",
+				"[concat(variables('factoryId'), '/datasets/DimProductDS')]",
+				"[concat(variables('factoryId'), '/datasets/ManufacturingFactDS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ADFCred')]",
+			"type": "Microsoft.DataFactory/factories/credentials",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "ManagedIdentity",
+				"typeProperties": {
+					"resourceId": "/subscriptions/fb94e2d7-130c-4c21-9316-68ad17fbe505/resourceGroups/HEDUKRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ADFManagedID"
+				}
+			},
+			"dependsOn": []
 		}
 	]
 }

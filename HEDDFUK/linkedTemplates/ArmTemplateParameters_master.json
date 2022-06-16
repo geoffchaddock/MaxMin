@@ -11,6 +11,9 @@
 		"AzureSqlDatabase1_connectionString": {
 			"value": ""
 		},
+		"HEDSalesADLGen2DL_accountKey": {
+			"value": ""
+		},
 		"MaxMinBatchFileLS_connectionString": {
 			"value": ""
 		},
@@ -19,6 +22,15 @@
 		},
 		"MaxMinSale_ArchiveLS_connectionString": {
 			"value": ""
+		},
+		"HEDSalesADLGen2DL_properties_typeProperties_url": {
+			"value": "https://hedsadl.dfs.core.windows.net/"
+		},
+		"HEDSalesAZXLS_properties_typeProperties_endpoint": {
+			"value": "https://hedukade.ukwest.kusto.windows.net"
+		},
+		"HEDSalesAZXLS_properties_typeProperties_database": {
+			"value": "dbHEDSalesUK"
 		},
 		"containerUri": {
 			"value": ""

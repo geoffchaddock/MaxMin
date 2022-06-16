@@ -15,6 +15,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabase1'"
 		},
+		"HEDSalesADLGen2DL_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'HEDSalesADLGen2DL'"
+		},
 		"MaxMinBatchFileLS_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'MaxMinBatchFileLS'"
@@ -26,6 +30,18 @@
 		"MaxMinSale_ArchiveLS_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'MaxMinSale_ArchiveLS'"
+		},
+		"HEDSalesADLGen2DL_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://hedsadl.dfs.core.windows.net/"
+		},
+		"HEDSalesAZXLS_properties_typeProperties_endpoint": {
+			"type": "string",
+			"defaultValue": "https://hedukade.ukwest.kusto.windows.net"
+		},
+		"HEDSalesAZXLS_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "dbHEDSalesUK"
 		},
 		"containerUri": {
 			"type": "string",
@@ -60,6 +76,9 @@
 					"AzureSqlDatabase1_connectionString": {
 						"value": "[parameters('AzureSqlDatabase1_connectionString')]"
 					},
+					"HEDSalesADLGen2DL_accountKey": {
+						"value": "[parameters('HEDSalesADLGen2DL_accountKey')]"
+					},
 					"MaxMinBatchFileLS_connectionString": {
 						"value": "[parameters('MaxMinBatchFileLS_connectionString')]"
 					},
@@ -68,10 +87,39 @@
 					},
 					"MaxMinSale_ArchiveLS_connectionString": {
 						"value": "[parameters('MaxMinSale_ArchiveLS_connectionString')]"
+					},
+					"HEDSalesADLGen2DL_properties_typeProperties_url": {
+						"value": "[parameters('HEDSalesADLGen2DL_properties_typeProperties_url')]"
+					},
+					"HEDSalesAZXLS_properties_typeProperties_endpoint": {
+						"value": "[parameters('HEDSalesAZXLS_properties_typeProperties_endpoint')]"
+					},
+					"HEDSalesAZXLS_properties_typeProperties_database": {
+						"value": "[parameters('HEDSalesAZXLS_properties_typeProperties_database')]"
 					}
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "HEDDFUK_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'HEDDFUK_ArmTemplate_0')]"
+			]
 		}
 	]
 }
