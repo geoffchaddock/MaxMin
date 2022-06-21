@@ -349,7 +349,7 @@
 						"type": "Script",
 						"dependsOn": [
 							{
-								"activity": "Clear Down Table",
+								"activity": "Load ManufacturingFact",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -384,7 +384,7 @@
 						"type": "ExecuteDataFlow",
 						"dependsOn": [
 							{
-								"activity": "Record Load Metadatas",
+								"activity": "Clear Down Table",
 								"dependencyConditions": [
 									"Succeeded"
 								]
