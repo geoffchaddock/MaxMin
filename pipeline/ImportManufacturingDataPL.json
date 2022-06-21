@@ -90,11 +90,6 @@
 								"value": "'@{pipeline().parameters.BatchFile}'",
 								"type": "Expression"
 							}
-						},
-						"datasetParameters": {
-							"BatchFile": {
-								"BatchFileImport": "Apr.csv"
-							}
 						}
 					},
 					"compute": {
