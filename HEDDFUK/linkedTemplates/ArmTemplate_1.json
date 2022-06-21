@@ -362,9 +362,7 @@
 									}
 								},
 								"datasetParameters": {
-									"BatchFile": {
-										"BatchFileImport": "Apr.csv"
-									},
+									"BatchFile": {},
 									"DimMachine": {},
 									"DimProduct": {},
 									"ExistingManufacturingFact": {},
