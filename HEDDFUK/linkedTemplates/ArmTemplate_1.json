@@ -384,7 +384,8 @@
 				},
 				"parameters": {
 					"BatchFile": {
-						"type": "string"
+						"type": "string",
+						"defaultValue": "Nov.csv"
 					}
 				},
 				"annotations": []
