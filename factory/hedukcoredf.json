@@ -1,0 +1,9 @@
+{
+	"name": "hedukcoredf",
+	"location": "ukwest",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "430e0f75-a4b3-4c1f-b42b-9bd1a554f71d",
+		"tenantId": "26838705-b8cf-4fb4-a9d3-1a14c2717e5c"
+	}
+}
